@@ -12,13 +12,13 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.01t3jpf.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.wh7nz7n.mongodb.net/?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 })
 
 async function run() {
     try {
-        const allPostCollection = client.db('Message-book').collection('allPost');
-        const allUsersCollection = client.db('Message-book').collection('users');
+        const allPostCollection = client.db('RJ-media').collection('allPost');
+        const allUsersCollection = client.db('RJ-media').collection('users');
 
         app.get('/allPosts', async (req, res) => {
             const query = {}
@@ -28,10 +28,7 @@ async function run() {
 
         app.get('/topPost', async (req, res) => {
             const query = {}
-            const option = {
-                sort: { love: -1 },
-            }
-            const result = await allPostCollection.find(query, option).limit(3).toArray()
+            const result = await allPostCollection.find(query).toArray()
             res.send(result);
         })
 
@@ -98,6 +95,13 @@ async function run() {
             res.send(user)
         })
 
+        app.delete('/post/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await allPostCollection.deleteOne(filter);
+            res.send(result);
+        })
+
         app.get('/posts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -105,25 +109,16 @@ async function run() {
             res.send(post)
         })
 
-
-
-        app.put('/user/:id', async (req, res) => {
-            const id = req.params.id;
-            const unique = { _id: ObjectId(id) };
-            const oldUser = req.body;
-            const option = { upsert: true };
-            const updateuserInfo = {
-                $set: {
-                    name: oldUser.name,
-                    email: oldUser.email,
-                    university: oldUser.university,
-                    address: oldUser.address
-
-                }
-            }
-            const result = await allUsersCollection.updateOne(unique, updateuserInfo, option);
+        app.get('/posts', async (req, res) => {
+            const email = req.query.email
+            const query = { email: email }
+            const result = await allPostCollection.find(query).toArray();
             res.send(result);
         })
+
+
+
+
 
 
 
@@ -139,8 +134,8 @@ run().catch(error => console.log(error))
 
 
 app.get('/', async (req, res) => {
-    res.send('Message book server is running')
+    res.send('RJ-media book server is running')
 })
 app.listen(port, () => {
-    console.log(`Message book server running on port ${port}`);
+    console.log(`Rj-media book server running on port ${port}`);
 })
